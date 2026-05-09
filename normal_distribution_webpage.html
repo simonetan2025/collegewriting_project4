@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Normal Distribution: The Divine Rule — and Where It Breaks</title>
+<style>
+  :root {
+    --navy: #0d1b2a;
+    --deep: #1b3a57;
+    --accent: #2a6db0;
+    --cream: #f5f1ea;
+    --paper: #ffffff;
+    --ink: #15212e;
+    --muted: #5a6a7a;
+    --rule: #d8d0c4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Source Serif Pro", "Iowan Old Style", Georgia, "Times New Roman", serif;
+    font-size: 19px;
+    line-height: 1.7;
+    color: var(--ink);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .display, .nav, .caption, .pull-quote, .meta, .toc, .label {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    position: relative;
+    height: 100vh;
+    min-height: 640px;
+    width: 100%;
+    overflow: hidden;
+    background: var(--navy);
+    display: flex;
+    align-items: flex-end;
+  }
+  .hero img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+  }
+  .hero::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(13,27,42,0.15) 0%, rgba(13,27,42,0.25) 50%, rgba(13,27,42,0.85) 100%);
+  }
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+    padding: 80px 8vw 100px;
+    max-width: 1200px;
+  }
+  .hero .label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #c9d6e6;
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+  .hero h1 {
+    font-size: clamp(40px, 6.5vw, 84px);
+    line-height: 1.05;
+    color: #fff;
+    margin-bottom: 24px;
+    max-width: 18ch;
+  }
+  .hero .subtitle {
+    font-family: "Source Serif Pro", Georgia, serif;
+    font-size: clamp(18px, 1.8vw, 24px);
+    font-style: italic;
+    color: #d6e2f0;
+    font-weight: 400;
+    max-width: 50ch;
+  }
+  .hero .byline {
+    margin-top: 40px;
+    font-size: 14px;
+    color: #b6c4d4;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* ===== PROSE SECTIONS ===== */
+  section {
+    padding: 100px 8vw;
+  }
+  .prose {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .section-label {
+    display: inline-block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+  .prose h2 {
+    font-size: clamp(28px, 3.8vw, 44px);
+    line-height: 1.15;
+    color: var(--navy);
+    margin-bottom: 32px;
+    max-width: 22ch;
+  }
+  .prose p {
+    margin-bottom: 22px;
+  }
+  .prose p + p { text-indent: 0; }
+
+  .prose strong { color: var(--navy); }
+
+  /* ===== ALTERNATING BACKGROUND ===== */
+  .cream { background: var(--cream); }
+  .navy {
+    background: var(--navy);
+    color: #e8eef5;
+  }
+  .navy .prose h2 { color: #fff; }
+  .navy .section-label { color: #6ea3d6; }
+  .navy strong { color: #fff; }
+
+  /* ===== SPLIT (image + text) ===== */
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 0;
+    align-items: stretch;
+    min-height: 80vh;
+  }
+  .split .media {
+    background-size: cover;
+    background-position: center;
+    background-color: var(--navy);
+  }
+  .split .copy {
+    padding: 100px 6vw;
+    display: flex;
+    align-items: center;
+  }
+  .split .copy-inner { max-width: 560px; }
+
+  .split.reverse .media { order: 2; }
+  .split.reverse .copy { order: 1; }
+
+  /* ===== FULL-BLEED IMAGE ===== */
+  .bleed {
+    position: relative;
+    height: 90vh;
+    min-height: 520px;
+    overflow: hidden;
+    background: var(--navy);
+  }
+  .bleed img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .bleed .caption {
+    position: absolute;
+    left: 8vw; right: 8vw; bottom: 40px;
+    color: #fff;
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+    background: rgba(13,27,42,0.55);
+    padding: 18px 22px;
+    border-left: 3px solid var(--accent);
+    backdrop-filter: blur(4px);
+    max-width: 720px;
+  }
+
+  /* ===== PULL QUOTE ===== */
+  .quote-block {
+    padding: 140px 8vw;
+    background: linear-gradient(135deg, var(--deep) 0%, var(--navy) 100%);
+    color: #fff;
+    text-align: center;
+  }
+  .pull-quote {
+    font-family: "Source Serif Pro", Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(28px, 4vw, 48px);
+    line-height: 1.25;
+    max-width: 22ch;
+    margin: 0 auto;
+  }
+  .pull-quote::before { content: "“"; opacity: 0.4; margin-right: 4px; }
+  .pull-quote::after  { content: "”"; opacity: 0.4; margin-left: 4px; }
+  .quote-attr {
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: #aebccf;
+    margin-top: 36px;
+  }
+
+  /* ===== CHART PANEL ===== */
+  .chart-panel {
+    padding: 80px 8vw;
+    background: var(--cream);
+    text-align: center;
+  }
+  .chart-panel img {
+    max-width: 1100px;
+    width: 100%;
+    height: auto;
+    box-shadow: 0 12px 40px rgba(13,27,42,0.18);
+    border-radius: 6px;
+    background: #fff;
+  }
+  .chart-panel .caption {
+    margin: 28px auto 0;
+    max-width: 720px;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ===== WORKS CITED ===== */
+  .citations { background: var(--navy); color: #d4dae3; padding: 100px 8vw; }
+  .citations h2 { color: #fff; font-size: 36px; margin-bottom: 32px; }
+  .citations ol { list-style: none; counter-reset: cite; max-width: 820px; margin: 0 auto; padding: 0; }
+  .citations li {
+    counter-increment: cite;
+    padding-left: 44px;
+    position: relative;
+    margin-bottom: 22px;
+    line-height: 1.55;
+    font-size: 16px;
+    text-indent: -32px;
+  }
+  .citations li::before {
+    content: counter(cite);
+    position: absolute;
+    left: 0; top: 0;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    text-indent: 0;
+    text-align: center;
+    line-height: 28px;
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .citations a { color: #8fc0f0; text-decoration: none; word-break: break-all; }
+  .citations a:hover { text-decoration: underline; }
+
+  /* ===== FOOTER ===== */
+  footer {
+    background: #0a141d;
+    color: #6a7889;
+    text-align: center;
+    padding: 36px 8vw;
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ===== TOC NAV ===== */
+  .toc {
+    position: fixed;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .toc a {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(13,27,42,0.25);
+    border: 2px solid transparent;
+    display: block;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .toc a:hover { background: var(--accent); transform: scale(1.3); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 800px) {
+    body { font-size: 17px; }
+    section, .quote-block, .citations { padding: 70px 6vw; }
+    .split { grid-template-columns: 1fr; min-height: auto; }
+    .split .media { height: 50vh; }
+    .split.reverse .media { order: 0; }
+    .split.reverse .copy { order: 1; }
+    .split .copy { padding: 60px 6vw; }
+    .toc { display: none; }
+    .hero { height: 90vh; }
+    .hero-content { padding: 40px 6vw 60px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Floating TOC -->
+<nav class="toc" aria-label="Table of contents">
+  <a href="#hero" title="Cover"></a>
+  <a href="#interest" title="My Interest"></a>
+  <a href="#two-rules" title="God's Two Rules"></a>
+  <a href="#what-is" title="What It Is"></a>
+  <a href="#clt" title="CLT"></a>
+  <a href="#question" title="Central Question"></a>
+  <a href="#practice" title="In Practice"></a>
+  <a href="#powerlaw" title="Power Laws"></a>
+  <a href="#wall-street" title="Wall Street"></a>
+  <a href="#conclusion" title="Conclusion"></a>
+  <a href="#reflection" title="Reflection"></a>
+  <a href="#cited" title="Works Cited"></a>
+</nav>
+
+<!-- ========== 1. HERO ========== -->
+<header id="hero" class="hero">
+  <img src="page1.jpg" alt="Bell curve composed beside microscope and scatter plot, scientific imagery">
+  <div class="hero-content">
+    <div class="label">Project 4 · Multimodal Composition</div>
+    <h1>Normal Distribution: The Divine Rule — and Where It Breaks</h1>
+    <p class="subtitle">A central question, asked carefully: if the bell curve is statistics' most fundamental object, why do practitioners so rarely use it?</p>
+    <p class="byline">By Junhan Tan · College Writing</p>
+  </div>
+</header>
+
+<!-- ========== 2. MY INTEREST ========== -->
+<section id="interest">
+  <div class="prose">
+    <div class="section-label">§ 1 · Origin of the Question</div>
+    <h2>My Interest in the Topic</h2>
+    <p>This semester, my experience in a statistics course led me to rethink something I had previously taken for granted: the role of the normal distribution. At the beginning of the course, I understood it as one of the most fundamental concepts in statistics, often presented as the model for how real-world data behave — exam scores, natural variation, measurement error. Because of this, I assumed most datasets would naturally follow a bell-shaped curve.</p>
+    <p>As I worked through assignments and exams, I began to notice a disconnection between theory and practice. In class, I rarely used the normal distribution directly when analyzing data. Instead, I relied on methods such as the t-test, which account for uncertainty in smaller samples. This raised a question I could not let go of: <strong>if the normal distribution is so fundamental to statistical theory, why is it not used as frequently in real-world analysis?</strong></p>
+    <p>That question became more interesting when I looked at actual data from my coursework. Real distributions did not always match the symmetry and smoothness expected of a normal curve. These observations made me curious about the limitations of the normal model and motivated me to explore how statistical methods adapt to real-world conditions.</p>
+  </div>
+</section>
+
+<!-- ========== 3. SPLIT — God's Two Rules ========== -->
+<div id="two-rules" class="split reverse">
+  <div class="media" style="background-image: url('page2.jpg');" role="img" aria-label="Abstract scatter of white particles on dark background, evoking randomness"></div>
+  <div class="copy" style="background: var(--navy); color: #e8eef5;">
+    <div class="copy-inner">
+      <div class="section-label" style="color:#6ea3d6;">§ 2 · Premise</div>
+      <h2 style="color:#fff; font-family: 'Inter', sans-serif; font-weight: 700; font-size: clamp(28px, 3.5vw, 40px); margin-bottom: 28px; line-height: 1.15;">God's Two Rules</h2>
+      <p>God has laid down two rules for our world. First, the maximum speed of light cannot be exceeded anywhere or at any time. Second, all microscopic particles occur and move randomly.</p>
+      <p>The first rule can be explained by Einstein's theory of relativity. The second made him ponder the divinity of the universe: <em>if God is always playing dice and everything is uncertain, how do we have such a stable worldly life?</em></p>
+      <p>To address this question, we have to understand the divine law of entropy increase, which leads to the mathematical form of the normal distribution. Physicists and mathematicians have proven that <strong style="color:#fff;">God not only plays dice, but does so constantly</strong> (Piazza).</p>
+      <p>Our world can be modeled as a random combination of enormous numbers of random particles. The tendency of these random states to drift toward uniform distribution is, at the aggregate level, the normal distribution. The fate of the universe is heat death — a state in which all particles are evenly distributed and entropy is maximized. In this final state, when all isolated random events are aggregated, they form a normal distribution. Normal distribution is, in this sense, the inviolable law of the cosmos.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 4. FULL-BLEED — Gauss banknote ========== -->
+<div class="bleed">
+  <img src="page3.jpg" alt="1993 German 10 Deutsche Mark banknote featuring Carl Friedrich Gauss and the normal distribution curve">
+  <div class="caption">
+    Carl Friedrich Gauss on the 1993 German 10 DM banknote, beside the normal curve he derived. A sovereign government printed a probability distribution on its currency — a strong statement about cultural authority. <em>Photograph of public-domain currency.</em>
+  </div>
+</div>
+
+<!-- ========== 5. WHAT IS IT ========== -->
+<section id="what-is" class="cream">
+  <div class="prose">
+    <div class="section-label">§ 3 · Definition</div>
+    <h2>What the Normal Distribution Is</h2>
+    <p>As Wikipedia puts it, the normal distribution is "a type of continuous probability distribution for a real-valued random variable" ("Normal Distribution"). It is also called the Gaussian distribution, named after the German mathematician Carl Friedrich Gauss, who derived it while studying measurement errors and made it widely accepted.</p>
+    <p>The graph itself is a symmetric curve, high in the middle and low at both ends. The peak represents a higher probability of occurrence; the tails represent lower probabilities. When all isolated events are summed, the average value has the highest probability, and extreme highs and lows are rare events.</p>
+  </div>
+</section>
+
+<!-- ========== 6. CLT ========== -->
+<section id="clt">
+  <div class="prose">
+    <div class="section-label">§ 4 · Mechanism</div>
+    <h2>Why Aggregates Become Normal: The Central Limit Theorem</h2>
+    <p>The reason normal distributions appear so often is not coincidence; it is a mathematical theorem. In <em>All of Statistics</em>, Larry Wasserman states the <strong>Central Limit Theorem (CLT)</strong>: if X₁, X₂, …, Xₙ are independent and identically distributed random variables with finite mean μ and finite variance σ², then as n grows large, the distribution of the sample mean approaches a normal distribution with mean μ and variance σ²/n (Wasserman 77, Theorem 5.11).</p>
+    <p>This is why heights, exam scores, and the daily deposits at a bank — each shaped by many small, independent contributions — all aggregate into the familiar bell curve. The CLT is the formal reason God appears to play dice "constantly": when independent randomness compounds, normality is the statistical inevitability.</p>
+  </div>
+</section>
+
+<!-- ========== 7. PULL QUOTE — central question ========== -->
+<div id="question" class="quote-block">
+  <p class="pull-quote">If the normal distribution is so fundamental to statistical theory, why is it not used as frequently in real-world analysis?</p>
+  <div class="quote-attr">— The central question of this composition</div>
+</div>
+
+<!-- ========== 8. IN PRACTICE ========== -->
+<section id="practice" class="cream">
+  <div class="prose">
+    <div class="section-label">§ 5 · Theory vs. Practice</div>
+    <h2>Why I Rarely Use the Normal Distribution in Practice</h2>
+    <p>And yet, in my own statistics coursework, I almost never apply the normal distribution directly. The reason is the gap between the CLT's <em>asymptotic</em> promise and the <em>finite samples</em> I actually have. The CLT guarantees normality "as n → ∞," but real datasets are bounded — a class of 30, a survey of 200, a clinical trial of 80.</p>
+    <p>With small samples and an unknown population variance, the t-distribution corrects for the extra uncertainty in estimating σ from the data itself; as n grows, the t-distribution converges back to the normal. My classroom toolkit is not abandoning the bell curve. It is adapting it to the conditions of finite data.</p>
+  </div>
+</section>
+
+<!-- ========== 9. POWER LAW ========== -->
+<section id="powerlaw">
+  <div class="prose">
+    <div class="section-label">§ 6 · Limits of the Model</div>
+    <h2>Where the Bell Curve Breaks: Power Laws and Black Swans</h2>
+    <p>The deeper limitation is more than sample size. The CLT requires that contributing factors be <strong>independent</strong>. When factors interact — when one person's panic drives another's — the assumption fails, and the resulting distribution is no longer normal but a <strong>power law</strong>. A butterfly in the Amazon that triggers a tornado in Texas, the Pareto 80/20 rule, the Matthew effect of winner-takes-all markets — these are not extreme tails of a normal curve. They are a different mathematical object, where extremes are common and the mean is misleading.</p>
+    <p>In a 2025 Federal Reserve working paper, Daniel Barth and Stacey Schreft argue that the most consequential financial events are <em>unknown unknowns</em> — what Nassim Taleb calls black swans (Barth and Schreft 2–4). They distinguish black swans from "grey swans" (low-probability events whose probability we can estimate) and from ducks (small, well-understood events). Their central policy claim is that because black swans cannot be predicted, regulators should design financial systems for <strong>resilience</strong>, not for prediction. That shift — from forecasting to resilience — only makes sense if you accept that the normal model has structural limits.</p>
+  </div>
+</section>
+
+<!-- ========== 10. CHART — Klement ========== -->
+<div class="chart-panel">
+  <img src="klement_chart.png" alt="Histogram of 10-year stock market returns labelled with secular bear, mixed, and secular bull regimes, with a smooth normal-distribution curve overlaid that obviously fails to fit the trimodal empirical data">
+  <p class="caption">Joachim Klement's 1900–2019 distribution of 10-year U.S. stock market returns. The empirical histogram (blue bars) is clearly trimodal — secular bear / mixed / secular bull regimes — while the fitted normal curve (dark line) misses the actual shape entirely. Real markets are not normally distributed (Klement).</p>
+</div>
+
+<!-- ========== 11. WALL STREET ========== -->
+<section id="wall-street" class="cream">
+  <div class="prose">
+    <div class="section-label">§ 7 · Case Study</div>
+    <h2>A Cautionary Tale: The Formula That Killed Wall Street</h2>
+    <p>The 2008 financial crisis is the most expensive demonstration of those limits. As Manojkumar K explains in "The Formula That Killed Wall Street," banks bundled mortgages into collateralized debt obligations and priced default risk using the <strong>Gaussian copula</strong> — a model that treats correlated mortgage defaults as if they were drawn from a normal distribution.</p>
+    <p>Three things went wrong: the model was calibrated on only ten years of data with virtually no defaults, it was structurally blind to <em>simultaneous</em> extreme events ("tail blindness"), and institutional incentives discouraged anyone from questioning the assumption. When housing prices fell across the country at once, the assumption of independence collapsed, the copula's tail estimates were off by orders of magnitude, and trillions of dollars in supposedly safe assets defaulted (Manojkumar K). <strong>The bell curve had not failed. It had been used outside the conditions where it applies.</strong></p>
+  </div>
+</section>
+
+<!-- ========== 12. CONCLUSION ========== -->
+<section id="conclusion" class="navy">
+  <div class="prose">
+    <div class="section-label">§ 8 · Conclusion</div>
+    <h2>What the Normal Distribution Actually Is</h2>
+    <p>So what is the normal distribution, really? It is not a description of the world. It is a description of <em>what happens when many small, independent random contributions are summed</em>. Inside that domain — heights, measurement errors, daily bank traffic — it is, as the original essay claims, nearly a divine rule. Outside that domain — when interaction, feedback, or unknown unknowns dominate — using it is not merely imprecise but dangerous.</p>
+    <p>The right question for a student of statistics is not <em>"does this data look normal?"</em> but <em>"are the conditions that produce normality actually present here?"</em> If yes, the bell curve is the most reliable tool we have. If no, we need different mathematics — and, as Barth and Schreft argue, different policy.</p>
+    <p>The next steps I see are practical: more undergraduate emphasis on diagnosing when the normal assumption holds, more visibility for heavy-tailed and power-law models, and more humility about the boundary between the two.</p>
+  </div>
+</section>
+
+<!-- ========== 13. REFLECTION ========== -->
+<section id="reflection">
+  <div class="prose">
+    <div class="section-label">Reflection</div>
+    <h2>On Process, Modes, and Audience</h2>
+    <p>Developing this project began with a small private confusion: in coursework I almost never used the distribution my textbook called fundamental. My first version of the question was diagnostic — <em>why the gap?</em> — but as I read more, the question pushed into a position. The normal distribution is genuinely fundamental, but only inside conditions that practitioners routinely violate. My intended audience is other undergraduate students who, like me, learned the bell curve as a default rather than as a model with assumptions; my purpose is to make those assumptions visible, so the next time they apply or read about statistical analysis, they ask whether the conditions actually hold.</p>
+    <p>I chose three modes of communication. <strong>Written prose</strong> carries the technical argument — the Central Limit Theorem, the t-distribution, the contrast between normal and power-law — because the logical chain depends on precise definitions, and prose is the only mode disciplined enough to handle them. <strong>Photographic image</strong> (the 1993 German 10 Mark banknote featuring Gauss and a normal curve) places the mathematics inside human history; a sovereign government printed a probability distribution on its money, which is a stronger statement about cultural authority than any sentence I could write. <strong>Data visualization</strong> (Klement's empirical histogram of 10-year stock market returns against a fitted normal curve) makes the central argument visible at a glance: the empirical histogram is obviously trimodal and bears almost no resemblance to the normal model, which is exactly the failure-mode the article is about. I considered audio — a voiced reading of the central question — but rejected it because the argument is structural and the reader benefits from controlling pace.</p>
+    <p>The webpage format suits a layered argument: readers scroll past the introduction into the evidence at their own speed, each piece of media sits immediately next to the claim it supports, and the page renders on a phone — which is where most of my classmates would actually read it. The webpage is also more public than a Word document, which feels appropriate for a project whose subject is a widely misunderstood public concept.</p>
+  </div>
+</section>
+
+<!-- ========== 14. WORKS CITED ========== -->
+<section id="cited" class="citations">
+  <div style="max-width: 820px; margin: 0 auto;">
+    <div class="section-label" style="color:#6ea3d6;">References</div>
+    <h2>Works Cited</h2>
+    <ol>
+      <li>Barth, Daniel J., and Stacey L. Schreft. "Black Swans and Financial Stability: A Framework for Building Resilience." <em>Finance and Economics Discussion Series</em>, no. 2025-043, Board of Governors of the Federal Reserve System, 20 May 2025, <a href="https://doi.org/10.17016/FEDS.2025.043">doi.org/10.17016/FEDS.2025.043</a>.</li>
+      <li>Klement, Joachim. "The Distribution of Stock Market Returns." <em>Klement on Investing</em>, 16 Jan. 2020, <a href="https://klementoninvesting.substack.com/p/the-distribution-of-stock-market">klementoninvesting.substack.com/p/the-distribution-of-stock-market</a>.</li>
+      <li>Manojkumar K. "The Formula That Killed Wall Street." <em>Medium</em>, May 2026, <a href="https://medium.com/@manojk030303/the-formula-that-killed-wall-street-3be68cb86591">medium.com/@manojk030303/the-formula-that-killed-wall-street-3be68cb86591</a>.</li>
+      <li>"Normal Distribution." <em>Wikipedia</em>, Wikimedia Foundation, <a href="https://en.wikipedia.org/wiki/Normal_distribution">en.wikipedia.org/wiki/Normal_distribution</a>. Accessed 8 May 2026.</li>
+      <li>Piazza, [Author First Name]. "[Title of Source]." [Publisher / Site], 2025. <em>— TO FILL IN from your draft's footnote 1.</em></li>
+      <li>Wasserman, Larry. <em>All of Statistics: A Concise Course in Statistical Inference</em>. Springer, 2004.</li>
+    </ol>
+  </div>
+</section>
+
+<footer>
+  Junhan Tan · College Writing · Project 4 Multimodal Composition · 2026
+</footer>
+
+</body>
+</html>
